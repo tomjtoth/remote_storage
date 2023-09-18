@@ -23,29 +23,8 @@ Set `.env` variables
 
 ## Client-side
 
-Store and retrieve data via fetch. The below class actually works:
+Store and retrieve data via fetch. Copy the below `<script>` tag into your static webpage
 
-```javascript
-class RemoteStorage {
-
-    constructor(db_url) {
-        this.db_url = db_url;
-    }
-
-    async get(key) {
-        return this.set(key);
-    };
-
-    async set(key, val = null) {
-        return await fetch(this.db_url + encodeURI('/storage/' + (val
-            ? key + '/' + val
-            : key
-        )), {
-            method: 'POST',
-            mode: 'cors'
-        })
-    }
-}
-// please don't abuse my server, thanks <3
-const remote_storage = new RemoteStorage('https://oracle-dev.tomjtoth.h4ck.me:44480');
+```html
+<script src="https://oracle-dev.tomjtoth.h4ck.me:44480/static/remoteStorage.js">
 ```
