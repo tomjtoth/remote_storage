@@ -1,5 +1,5 @@
 [package]
-name = "oracle_storage"
+name = "remote_storage"
 version = "0.1.0"
 edition = "2021"
 
@@ -12,3 +12,5 @@ tokio = { version = "1.30.0", features = ["full"] }
 axum = "0.6.20"
 dotenv = "0.15.0"
 regex = "1.9.5"
+axum-server = {version = "0.5.1", features = ["tls-rustls"]}
+tower-http = {version = "0.4.4", features = ["cors"]}

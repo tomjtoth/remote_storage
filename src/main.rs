@@ -1,11 +1,13 @@
 use axum::{
     extract::Path,
-    http::{HeaderMap, HeaderValue, StatusCode},
+    http::{HeaderMap, HeaderValue, Method, StatusCode},
     routing::post,
     Json,
 };
+use axum_server::tls_rustls::RustlsConfig;
 use dotenv::var;
 use regex::Regex;
+use tower_http::cors::{Any, CorsLayer};
 
 #[derive(Clone)]
 struct AppState {
@@ -67,7 +69,11 @@ async fn logic(
 async fn main() {
     dotenv::dotenv().ok();
     let listen_on = var("LISTEN_ON").unwrap_or("0.0.0.0:80".to_string());
-    let sock_addr = &listen_on.parse().expect("failed to parse ADDR:PORT");
+    let sock_addr = listen_on.parse().expect("failed to parse ADDR:PORT");
+
+    let tls_cert = var("TLS_CERT").expect("TLS_KEY not found in `.env`");
+    let tls_key = var("TLS_KEY").expect("TLS_KEY not found in `.env`");
+
     let mut allowed_hosts = r"^https?:\/\/(?:localhost|127\.0\.0\.1".to_string();
     if let Ok(s) = var("ALLOWED_HOSTS") {
         allowed_hosts.push_str("|");
@@ -80,6 +86,10 @@ async fn main() {
     let allow_list =
         Regex::new(&allowed_hosts).expect("unable to compile regex from ALLOWED_HOSTS");
 
+    let tls_conf = RustlsConfig::from_pem_file(tls_cert, tls_key)
+        .await
+        .unwrap();
+
     let db_uri = var("DB_URI").unwrap_or("fallback.db".to_string());
 
     let pool = sqlx::SqlitePool::connect(&format!("sqlite://{}?mode=rwc", db_uri))
@@ -90,6 +100,12 @@ async fn main() {
         .execute(&pool)
         .await
         .expect("unable to execute schema.sql");
+
+    let cors_layer = CorsLayer::new()
+        // allow `GET` and `POST` when accessing the resource
+        .allow_methods([Method::GET, Method::POST])
+        // allow requests from any origin
+        .allow_origin(Any);
 
     let routes = axum::Router::new()
         .route(
@@ -108,9 +124,10 @@ async fn main() {
                 },
             ),
         )
-        .with_state(AppState { pool, allow_list });
+        .with_state(AppState { pool, allow_list })
+        .layer(cors_layer);
 
-    axum::Server::bind(sock_addr)
+    axum_server::bind_rustls(sock_addr, tls_conf)
         .serve(routes.into_make_service())
         .await
         .unwrap();

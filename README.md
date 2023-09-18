@@ -2,9 +2,24 @@
 
 Remote version of `localStorage`, 1 GIGANTIC security hole.
 
+## Build
+
+Simply run `cargo build --release` or if you need to cross-compile, like me, try something like:
+- ~~`rustup target add aarch64-unknown-linux-gnu`~~
+- install `docker` and `cross`
+    - run `sudo systemctl start docker`
+- run `cross build --release --target=aarch64-unknown-linux-gnu`
+- copy over your binary to the server
+    - also copy `.env` and `schema.sql` which is read on every startup
+
 ## Server-side
 
-Edit the `.env` file to contain at least `ALLOWED_HOSTS='username\.github\.io'` it is merged into a larger regex pattern.
+Get a TLS certificate via `certbot`. 
+Set `.env` variables 
+- `TLS_CERT` and `TLS_KEY` accordingly.
+- `ALLOWED_HOSTS='your-username\.github\.io'`
+    - it is merged into a larger **`regex pattern`**
+    - if the `Origin` of a request is different, it `HTTP 403` is returned
 
 ## Client-side
 
@@ -31,5 +46,6 @@ class RemoteStorage {
         })
     }
 }
-const remote_storage = new RemoteStorage('http://localhost:44480');
+// please don't abuse my server, thanks <3
+const remote_storage = new RemoteStorage('https://oracle-dev.tomjtoth.h4ck.me:44480');
 ```
