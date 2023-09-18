@@ -13,15 +13,18 @@
     <h1>You're doing it <b>WRONG!!</b></h1>
     <p>
         You're supposed to simply insert the below tag in your webpage:
-    <pre>
-        &lt;script src="https://oracle-dev.tomjtoth.h4ck.me:55589/remoteStorage.js"&gt;&lt;/script&gt;
-    </pre>
+    <pre>&lt;script src="https://oracle-dev.tomjtoth.h4ck.me:55589/remoteStorage.js"&gt;&lt;/script&gt;</pre>
     And make calls via
     <ul>
         <li><code>let result = await remoteStorage.set(key, val)</code></li>
         <li><code>let result = await remoteStorage.get(key)</code></li>
         <li><code>let result = await remoteStorage.clear()</code></li>
     </ul>
+    </p>
+    <h2>About</h2>
+    <p>
+        This is almost like <code>window.localStorage</code>, except it is synced accross ALL clients of a certain
+        webpage.
     </p>
 </body>
 
