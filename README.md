@@ -93,6 +93,8 @@ Simply run `cargo build --release` or if you need to cross-compile, like me, try
 
 ## Server-side
 
+Get a TLS certificate, I used [Let's Encrypt](https://letsencrypt.org/) via installing `certbot` and running it with the `--standalone` and `certonly` flags. Running an HTTP server and making requests to it from an Origin that's using HTTPS would result in [Mixed content](https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content).
+
 Set `.env` variables:
 - path to your database file:
     - `DB_URI=path/to/your.db`
@@ -102,12 +104,11 @@ Set `.env` variables:
     - default is `0.0.0.0:80` which requires root priviliges
 - `ALLOWED_HOSTS='your-username\.github\.io'`
     - it is merged into a larger **`regex pattern`**
-    - if the `Origin` of a request is different, it `HTTP 403` is returned
-- Get a TLS certificate via `certbot`
-    - `TLS_CERT` and `TLS_KEY` accordingly
+    - if the `Origin` of a request is different, `HTTP 403` is returned
+- set `TLS_CERT` and `TLS_KEY`:
     - e.g. `TLS_CERT=/etc/letsencrypt/live/your-website.xyz/fullchain.pem`
     - e.g. `TLS_KEY=/etc/letsencrypt/live/your-website.xyz/privkey.pem`
-- `CLEARING_SITE_DATA_ALLOWED`:
+- set `CLEARING_SITE_DATA_ALLOWED`:
     - `true` to to enable
     -  or `false` to disable 
 
@@ -121,9 +122,12 @@ Store and retrieve data via fetch. Copy the below `<script>` tag into your stati
 
 Usage is as below:
 - `await remoteStorage.set(key, val)` to store data
+    - `await` could be omitted there, unless you want to make sure you get the `HTTP 200` back
 - `let value = await remoteStorage.get(key)` to retrieve data
 - `await remoteStorage.clear()` to clear data that belongs to `Origin`
-    - provided that `.env` contains `CLEARING_SITE_DATA_ALLOWED=true`
+    - same as `.set(key, val)`, `await` only if you're interested in the returned response :D
+    - provided that `CLEARING_SITE_DATA_ALLOWED=true` is set in `.env` you get `HTTP 200`
+    - otherwise you get `HTTP 403`
 
 ## Manual test
 
