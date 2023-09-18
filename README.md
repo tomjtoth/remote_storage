@@ -26,7 +26,7 @@ Set `.env` variables
 Store and retrieve data via fetch. Copy the below `<script>` tag into your static webpage.
 
 ```html
-<script src="https://oracle-dev.tomjtoth.h4ck.me:44480/static/remoteStorage.js">
+<script src="https://oracle-dev.tomjtoth.h4ck.me:55589/remoteStorage.js">
 ```
 
 Usage is as below:
