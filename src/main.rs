@@ -13,6 +13,7 @@ use tower_http::services::ServeDir;
 struct AppState {
     pool: sqlx::SqlitePool,
     allow_list: Regex,
+    clearing_site_data_allowed: bool,
 }
 
 type St = axum::extract::State<AppState>;
@@ -34,6 +35,9 @@ async fn logic(s: St, url: String, args: Vec<String>) -> (StatusCode, Json<Optio
 
     // remoteStorage.clear()
     if args.len() == 0 {
+        if !s.clearing_site_data_allowed {
+            return (StatusCode::FORBIDDEN, Json(None));
+        };
         if let Ok(_) = sqlx::query(r"delete from strings where str == ?")
             .bind(url)
             .execute(&s.pool)
@@ -82,6 +86,9 @@ async fn main() {
     let tls_cert = var("TLS_CERT").expect("TLS_KEY not found in `.env`");
     let tls_key = var("TLS_KEY").expect("TLS_KEY not found in `.env`");
 
+    let clearing_site_data_allowed =
+        var("CLEARING_SITE_DATA_ALLOWED").unwrap_or("false".to_string()) == "true";
+
     let mut allowed_hosts = r"^https?:\/\/(?:localhost|127\.0\.0\.1".to_string();
     if let Ok(s) = var("ALLOWED_HOSTS") {
         allowed_hosts.push_str("|");
@@ -128,7 +135,11 @@ async fn main() {
             ),
         )
         .nest_service("/", ServeDir::new("static"))
-        .with_state(AppState { pool, allow_list })
+        .with_state(AppState {
+            pool,
+            allow_list,
+            clearing_site_data_allowed,
+        })
         .layer(cors_layer);
 
     axum_server::bind_rustls(sock_addr, tls_conf)
