@@ -1,6 +1,85 @@
 # About
 
-Remote and `async` version of `localStorage`, 1 GIGANTIC security hole.
+Remote and `async` version of `localStorage`, 1 __GIGANTIC SECURITY HOLE__. Based on the `Origin` of the HTTP request, it gets rejected with a `HTTP 403: FORBIDDEN` or gets processed. The stored data is then readable and *appendable* by **ALL** visitors of your website (Origin).
+
+## Example
+
+At this point the DB holds data related to 2 websites:
+- https://tomjtoth.github.io
+- https://oracle-dev.tomjtoth.h4ck.me:55589
+
+Extract of the human-readable `data` view:
+
+```
+sqlite> select * from data;
+https://tomjtoth.github.io|omena|qqq
+https://tomjtoth.github.io|omena|qqq
+https://tomjtoth.github.io|omena|qqq
+https://tomjtoth.github.io|omena|qqq
+https://tomjtoth.github.io|omena|qqq
+https://tomjtoth.github.io|omena|qqq
+https://tomjtoth.github.io|omena|qqq
+https://tomjtoth.github.io|omena|qqq2
+https://tomjtoth.github.io|omena|qqqy
+https://tomjtoth.github.io|omena|qqqyyyy
+https://tomjtoth.github.io|omena|qqqyyyíyy
+https://tomjtoth.github.io|omena|qqqyyyíyy
+https://tomjtoth.github.io|omena|qqqyyyíyy
+https://tomjtoth.github.io|omena|qqqyyyíyy
+https://oracle-dev.tomjtoth.h4ck.me:55589|koira|lalala
+https://oracle-dev.tomjtoth.h4ck.me:55589|omena|lalala
+https://oracle-dev.tomjtoth.h4ck.me:55589|omena|lalala223
+https://oracle-dev.tomjtoth.h4ck.me:55589|omena|qqq
+https://oracle-dev.tomjtoth.h4ck.me:55589|omena|qqq2
+https://oracle-dev.tomjtoth.h4ck.me:55589|koira|qq2
+```
+
+...that actually is stored in table `junction`:
+
+```
+sqlite> select * from junction;
+1|2|3
+1|2|3
+1|2|3
+1|2|3
+1|2|3
+1|2|3
+1|2|3
+1|2|4
+1|2|5
+1|2|6
+1|2|7
+1|2|7
+1|2|7
+1|2|7
+10|11|12
+10|2|12
+10|2|13
+10|2|3
+10|2|4
+10|11|9
+```
+
+...which only references uniqe texts saved to table `strings`:
+
+```
+sqlite> select * from strings;
+1|https://tomjtoth.github.io
+2|omena
+3|qqq
+4|qqq2
+5|qqqy
+6|qqqyyyy
+7|qqqyyyíyy
+9|qq2
+10|https://oracle-dev.tomjtoth.h4ck.me:55589
+11|koira
+12|lalala
+13|lalala223
+```
+
+If `CLEARING_SITE_DATA_ALLOWED`, then *any* client of the above mentioned 2 websites could erase ALL data related to that website, meaning `remoteStorage.clear()` initiated from `tomjtoth.github.io` would delete _row nro. 1_ from table `strings`, which in turn deletes _all rows_ from table junction _where the 1st column is `1`_. For this reason it defaults to `false`.
+
 
 ## Build
 
@@ -43,8 +122,8 @@ Store and retrieve data via fetch. Copy the below `<script>` tag into your stati
 Usage is as below:
 - `await remoteStorage.set(key, val)` to store data
 - `let value = await remoteStorage.get(key)` to retrieve data
-- `await remoteStorage.clear()` to clear the site's data
-    - provided that `.env` contains `CLEARING_SITE_DATA_ALLOWED`
+- `await remoteStorage.clear()` to clear data that belongs to `Origin`
+    - provided that `.env` contains `CLEARING_SITE_DATA_ALLOWED=true`
 
 ## Manual test
 
