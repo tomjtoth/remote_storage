@@ -25,12 +25,7 @@ fn get_url(url: Option<&HeaderValue>) -> Option<String> {
     None
 }
 
-async fn logic(
-    s: St,
-    url: String,
-    key: Option<String>,
-    val: Option<String>,
-) -> (StatusCode, Json<Option<Vec<String>>>) {
+async fn logic(s: St, url: String, args: Vec<String>) -> (StatusCode, Json<Option<Vec<String>>>) {
     if !s.allow_list.is_match(&url) {
         println!("FORBIDDEN: {}", url);
         return (StatusCode::FORBIDDEN, Json(None));
@@ -38,7 +33,7 @@ async fn logic(
     println!("ACCEPTED: {}", url);
 
     // remoteStorage.clear()
-    if key.is_none() {
+    if args.len() == 0 {
         if let Ok(_) = sqlx::query(r"delete from strings where str == ?")
             .bind(url)
             .execute(&s.pool)
@@ -50,10 +45,10 @@ async fn logic(
         }
     }
     // remoteStorage.get(key)
-    else if val.is_none() {
+    else if args.len() == 1 {
         if let Ok(res) = sqlx::query_scalar(r"select val from data where url == ? and key == ?")
             .bind(url)
-            .bind(key)
+            .bind(&args[0])
             .fetch_all(&s.pool)
             .await
         {
@@ -66,8 +61,8 @@ async fn logic(
     else {
         if let Ok(_) = sqlx::query(r"insert into data select ?, ?, ?")
             .bind(url)
-            .bind(key)
-            .bind(val)
+            .bind(&args[0])
+            .bind(&args[1])
             .execute(&s.pool)
             .await
         {
@@ -122,11 +117,9 @@ async fn main() {
         .route(
             "/storage",
             post(
-                |s: St,
-                 headers: HeaderMap,
-                 Json((key, val)): Json<(Option<String>, Option<String>)>| async move {
-                    if let Some(origin) = get_url(headers.get("Origin")) {
-                        logic(s, origin, key, val).await
+                |s: St, headers: HeaderMap, Json(args): Json<Vec<String>>| async move {
+                    if let Some(url) = get_url(headers.get("Origin")) {
+                        logic(s, url, args).await
                     } else {
                         (StatusCode::BAD_REQUEST, Json(None))
                     }

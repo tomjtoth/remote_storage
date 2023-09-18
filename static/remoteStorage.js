@@ -19,6 +19,6 @@ const remoteStorage = {
             method: 'POST',
             mode: 'cors',
             body: JSON.stringify(args)
-        }).then(response => response.json())
+        })
     }
 }
