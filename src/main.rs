@@ -1,5 +1,4 @@
 use axum::{
-    extract::Path,
     http::{HeaderMap, HeaderValue, Method, StatusCode},
     routing::post,
     Json,
@@ -8,6 +7,7 @@ use axum_server::tls_rustls::RustlsConfig;
 use dotenv::var;
 use regex::Regex;
 use tower_http::cors::{Any, CorsLayer};
+use tower_http::services::ServeDir;
 
 #[derive(Clone)]
 struct AppState {
@@ -27,41 +27,37 @@ fn get_url(url: Option<&HeaderValue>) -> Option<String> {
 
 async fn logic(
     s: St,
-    h: HeaderMap,
+    url: String,
     key: String,
     val: Option<String>,
 ) -> (StatusCode, Json<Option<Vec<String>>>) {
-    if let Some(url) = get_url(h.get("Origin")) {
-        if !s.allow_list.is_match(&url) {
-            println!("FORBIDDEN: {}", url);
-            return (StatusCode::FORBIDDEN, Json(None));
-        }
-        if val.is_some() {
-            if let Ok(_) = sqlx::query(r"insert into data select ?, ?, ?")
-                .bind(url)
-                .bind(key)
-                .bind(val)
-                .execute(&s.pool)
-                .await
-            {
-                (StatusCode::OK, Json(None))
-            } else {
-                (StatusCode::INTERNAL_SERVER_ERROR, Json(None))
-            }
+    if !s.allow_list.is_match(&url) {
+        println!("FORBIDDEN: {}", url);
+        return (StatusCode::FORBIDDEN, Json(None));
+    }
+    if val.is_some() {
+        if let Ok(_) = sqlx::query(r"insert into data select ?, ?, ?")
+            .bind(url)
+            .bind(key)
+            .bind(val)
+            .execute(&s.pool)
+            .await
+        {
+            (StatusCode::OK, Json(None))
         } else {
-            if let Ok(res) = sqlx::query_scalar(r"select val from data where url == ? and key == ?")
-                .bind(url)
-                .bind(key)
-                .fetch_all(&s.pool)
-                .await
-            {
-                (StatusCode::OK, Json(Some(res)))
-            } else {
-                (StatusCode::INTERNAL_SERVER_ERROR, Json(None))
-            }
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(None))
         }
     } else {
-        (StatusCode::BAD_REQUEST, Json(None))
+        if let Ok(res) = sqlx::query_scalar(r"select val from data where url == ? and key == ?")
+            .bind(url)
+            .bind(key)
+            .fetch_all(&s.pool)
+            .await
+        {
+            (StatusCode::OK, Json(Some(res)))
+        } else {
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(None))
+        }
     }
 }
 
@@ -88,7 +84,7 @@ async fn main() {
 
     let tls_conf = RustlsConfig::from_pem_file(tls_cert, tls_key)
         .await
-        .unwrap();
+        .expect("TLS config failure");
 
     let db_uri = var("DB_URI").unwrap_or("fallback.db".to_string());
 
@@ -102,30 +98,28 @@ async fn main() {
         .expect("unable to execute schema.sql");
 
     let cors_layer = CorsLayer::new()
-        // allow `GET` and `POST` when accessing the resource
         .allow_methods([Method::GET, Method::POST])
-        // allow requests from any origin
         .allow_origin(Any);
 
-    let routes = axum::Router::new()
-        .route(
-            "/storage/:key",
-            post(
-                |s: St, Path(key): Path<String>, headers: HeaderMap| async move {
-                    logic(s, headers, key, None).await
-                },
-            ),
-        )
-        .route(
-            "/storage/:key/:val",
-            post(
-                |s: St, Path((key, val)): Path<(String, String)>, headers: HeaderMap| async move {
-                    logic(s, headers, key, Some(val)).await
-                },
-            ),
-        )
-        .with_state(AppState { pool, allow_list })
-        .layer(cors_layer);
+    let routes =
+        axum::Router::new()
+            .route(
+                "/storage/",
+                post(
+                    |s: St,
+                     headers: HeaderMap,
+                     Json((key, val)): Json<(String, Option<String>)>| async move {
+                        if let Some(url) = get_url(headers.get("Origin")) {
+                            logic(s, url, key, val).await
+                        } else {
+                            (StatusCode::BAD_REQUEST, Json(None))
+                        }
+                    },
+                ),
+            )
+            .nest_service("/static/", ServeDir::new("static"))
+            .with_state(AppState { pool, allow_list })
+            .layer(cors_layer);
 
     axum_server::bind_rustls(sock_addr, tls_conf)
         .serve(routes.into_make_service())

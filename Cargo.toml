@@ -13,4 +13,4 @@ axum = "0.6.20"
 dotenv = "0.15.0"
 regex = "1.9.5"
 axum-server = {version = "0.5.1", features = ["tls-rustls"]}
-tower-http = {version = "0.4.4", features = ["cors"]}
+tower-http = {version = "0.4.4", features = ["cors", "fs"]}
