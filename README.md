@@ -33,3 +33,12 @@ Usage is as below:
 - `await remoteStorage.set(key, val)` to store data
 - `let value = await remoteStorage.get(key)` to retrieve data
 - `await remoteStorage.clear()` to clear the site's data
+
+## Manual test
+
+Tested from 2 different host:
+- populated 7+2 entries in table `strings`
+- then cleared the smaller portion
+- as expected:
+    - only the hostname from `strings` got deleted
+    - only rows belonging to said `host` got deleted from table `junction`
