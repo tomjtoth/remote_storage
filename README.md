@@ -121,7 +121,7 @@ Automate via `systemd`. The included [service](./remote_storage.service) starts 
 Store and retrieve data via fetch. Copy the below `<script>` tag into your static webpage.
 
 ```html
-<script src="https://oracle-dev.tomjtoth.h4ck.me:55589/remoteStorage.js">
+<script src="https://oracle-dev.tomjtoth.h4ck.me:55589/remoteStorage.js"></script>
 ```
 
 Usage is as below:
