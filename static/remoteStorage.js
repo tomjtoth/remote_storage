@@ -18,7 +18,7 @@ const remoteStorage = {
         return await fetch(this._db_url + '/storage', {
             method: 'POST',
             mode: 'cors',
-            body: args
+            body: JSON.stringify(args)
         }).then(response => response.json())
     }
 }

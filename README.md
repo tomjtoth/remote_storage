@@ -23,8 +23,13 @@ Set `.env` variables
 
 ## Client-side
 
-Store and retrieve data via fetch. Copy the below `<script>` tag into your static webpage
+Store and retrieve data via fetch. Copy the below `<script>` tag into your static webpage.
 
 ```html
 <script src="https://oracle-dev.tomjtoth.h4ck.me:44480/static/remoteStorage.js">
 ```
+
+Usage is as below:
+- `remoteStorage.set(key, val)` to store data
+- `remoteStorage.get(key)` to retrieve data
+- `remoteStorage.clear()` to clear the site's data

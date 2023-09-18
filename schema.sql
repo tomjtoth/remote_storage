@@ -4,9 +4,9 @@ create table if not exists strings(
 );
 
 create table if not exists junction(
-    url_id integer references strings(id),
-    key_id integer references strings(id),
-    val_id integer references strings(id)
+    url_id integer references strings(id) on delete cascade,
+    key_id integer references strings(id) on delete cascade,
+    val_id integer references strings(id) on delete cascade
 );
 
 create view if not exists data as
