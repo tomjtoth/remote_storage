@@ -104,7 +104,7 @@ async fn main() {
     let routes =
         axum::Router::new()
             .route(
-                "/storage/",
+                "/storage",
                 post(
                     |s: St,
                      headers: HeaderMap,
@@ -117,7 +117,7 @@ async fn main() {
                     },
                 ),
             )
-            .nest_service("/static/", ServeDir::new("static"))
+            .nest_service("/static", ServeDir::new("static"))
             .with_state(AppState { pool, allow_list })
             .layer(cors_layer);
 
