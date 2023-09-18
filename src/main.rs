@@ -1,5 +1,5 @@
 use axum::{
-    http::{HeaderMap, HeaderValue, Method, StatusCode},
+    http::{header::CONTENT_TYPE, HeaderMap, HeaderValue, Method, StatusCode},
     routing::post,
     Json,
 };
@@ -111,7 +111,8 @@ async fn main() {
 
     let cors_layer = CorsLayer::new()
         .allow_methods([Method::GET, Method::POST])
-        .allow_origin(Any);
+        .allow_origin(Any)
+        .allow_headers([CONTENT_TYPE]);
 
     let routes = axum::Router::new()
         .route(

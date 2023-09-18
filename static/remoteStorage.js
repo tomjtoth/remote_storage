@@ -15,10 +15,14 @@ const remoteStorage = {
     },
 
     async _rw(...args) {
-        return await fetch(this._db_url + '/storage', {
+        const resp = await fetch(this._db_url + '/storage', {
+            headers: {
+                'Content-Type': 'application/json'
+            },
             method: 'POST',
-            mode: 'cors',
             body: JSON.stringify(args)
-        })
+        });
+
+        return resp.json();
     }
 }

@@ -1,6 +1,6 @@
 # About
 
-Remote version of `localStorage`, 1 GIGANTIC security hole.
+Remote and `async` version of `localStorage`, 1 GIGANTIC security hole.
 
 ## Build
 
@@ -30,6 +30,6 @@ Store and retrieve data via fetch. Copy the below `<script>` tag into your stati
 ```
 
 Usage is as below:
-- `remoteStorage.set(key, val)` to store data
-- `remoteStorage.get(key)` to retrieve data
-- `remoteStorage.clear()` to clear the site's data
+- `await remoteStorage.set(key, val)` to store data
+- `let value = await remoteStorage.get(key)` to retrieve data
+- `await remoteStorage.clear()` to clear the site's data
