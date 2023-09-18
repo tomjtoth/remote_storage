@@ -1,0 +1,14 @@
+[Unit]
+Description=zero-auth zero-security async storage based on window.localStorage
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=10
+WorkingDirectory=%h/remote_storage
+ExecStart=%h/remote_storage/remote_storage
+
+[Install]
+WantedBy=default.target

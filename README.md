@@ -1,4 +1,6 @@
-# About
+# zero-auth zero-security async storage based on window.localStorage
+
+## About
 
 Remote and `async` version of `localStorage`, 1 __GIGANTIC SECURITY HOLE__. Based on the `Origin` of the HTTP request, it gets rejected with a `HTTP 403: FORBIDDEN` or gets processed. The stored data is then readable and *appendable* by **ALL** visitors of your website (Origin).
 
@@ -111,6 +113,8 @@ Set `.env` variables:
 - set `CLEARING_SITE_DATA_ALLOWED`:
     - `true` to to enable
     -  or `false` to disable 
+
+Automate via `systemd`. The included [service](./remote_storage.service) starts the server on system start and restarts it every 10 seconds upon failure. I enabled [user lingering](https://serverfault.com/questions/846441/loginctl-enable-linger-disable-linger-but-reading-linger-status), and the folder is located under `~/remote_storage/`.
 
 ## Client-side
 
