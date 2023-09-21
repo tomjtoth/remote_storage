@@ -1,8 +1,10 @@
-# zero-auth zero-security async storage based on window.localStorage
+# zero-auth zero-security async storage similar to window.localStorage
+
+I use this as a text bucket where my pages' visitors simply can append text.
 
 ## About
 
-Remote and `async` version of `localStorage`, 1 __GIGANTIC SECURITY HOLE__. Based on the `Origin` of the HTTP request, it gets rejected with a `HTTP 403: FORBIDDEN` or gets processed. The stored data is then readable and *appendable* by **ALL** visitors of your website (Origin).
+Remote and `async` version of `localStorage`, 1 __GIGANTIC SECURITY HOLE__. Based on the [Origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin) of the HTTP request, it gets rejected with a `HTTP 403: FORBIDDEN` or gets processed. The stored data is then readable and *appendable* by **ALL** visitors of your website (Origin).
 
 ## Example
 
@@ -114,24 +116,16 @@ Set `.env` variables:
     - `true` to to enable
     -  or `false` to disable 
 
-Automate via `systemd`. The included [service](./remote_storage.service) starts the server on system start and restarts it every 10 seconds upon failure. I enabled [user lingering](https://serverfault.com/questions/846441/loginctl-enable-linger-disable-linger-but-reading-linger-status), and the folder is located under `~/remote_storage/`.
+Automate via `systemd`. The included [service](./remote_storage.service)
+- starts the server on system start 
+- and restarts it every 10 seconds upon failure. 
+- I also enabled [user lingering](https://serverfault.com/questions/846441/loginctl-enable-linger-disable-linger-but-reading-linger-status)
+- and the working directory is located under `~/remote_storage/`
+    - you'll have to adjust the service file if you deviate
 
 ## Client-side
 
-Store and retrieve data via fetch. Copy the below `<script>` tag into your static webpage.
-
-```html
-<script src="https://oracle-dev.tomjtoth.h4ck.me:55589/remoteStorage.js"></script>
-```
-
-Usage is as below:
-- `await remoteStorage.set(key, val)` to store data
-    - `await` could be omitted there, unless you want to make sure you get the `HTTP 200` back
-- `let value = await remoteStorage.get(key)` to retrieve data
-- `await remoteStorage.clear()` to clear data that belongs to `Origin`
-    - same as `.set(key, val)`, `await` only if you're interested in the returned response :D
-    - provided that `CLEARING_SITE_DATA_ALLOWED=true` is set in `.env` you get `HTTP 200`
-    - otherwise you get `HTTP 403`
+Read instructions from <a href="https://ttj.hu:55589">here</a>.
 
 ## Manual test
 

@@ -1,6 +1,6 @@
 const remoteStorage = {
 
-    _db_url: 'https://oracle-dev.tomjtoth.h4ck.me:55589',
+    _db_url: 'https://ttj.hu:55589/storage',
 
     async clear() {
         return await this._rw()
@@ -15,7 +15,7 @@ const remoteStorage = {
     },
 
     async _rw(...args) {
-        const resp = await fetch(this._db_url + '/storage', {
+        const resp = await fetch(this._db_url, {
             headers: {
                 'Content-Type': 'application/json'
             },
