@@ -1,6 +1,6 @@
 const remoteStorage = {
 
-    _db_url: 'https://ttj.hu:55589/storage',
+    _db_url: 'https://oracle.ttj.hu:55589/storage',
 
     async clear() {
         return await this._rw()

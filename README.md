@@ -125,7 +125,7 @@ Automate via `systemd`. The included [service](./remote_storage.service)
 
 ## Client-side
 
-Read instructions from <a href="https://ttj.hu:55589">here</a>.
+Read instructions from <a href="https://oracle.ttj.hu:55589">here</a>.
 
 ## Manual test
 
