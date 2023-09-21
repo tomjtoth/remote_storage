@@ -1,5 +1,5 @@
 [Unit]
-Description=zero-auth zero-security async storage based on window.localStorage
+Description=zero-auth zero-security async storage similar to window.localStorage in JS
 After=network-online.target
 Wants=network-online.target
 
