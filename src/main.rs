@@ -134,6 +134,7 @@ async fn main() {
                 },
             ),
         )
+        .route("/meaning/of/life", axum::routing::get(Json(42)))
         .nest_service("/", ServeDir::new("static"))
         .with_state(AppState {
             pool,
